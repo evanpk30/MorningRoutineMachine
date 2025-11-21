@@ -1,4 +1,5 @@
 from gpiozero import OutputDevice, InputDevice, MotionSensor
+from DisplayTempHumLed import temp_hum_disp
 import time
 
 motorPins = (18, 25, 24, 23)
@@ -65,6 +66,7 @@ try:
 
         # ---------- ONE-TIME LIGHT TRIGGER ----------
         if not light_opened_once and light_detected():
+            temp_hum_disp()
             print("Light detected → Opening blinds (3 turns CW)...")
             move_steps(0, 3, THREE_TURNS)
             motor_stop()
@@ -76,6 +78,7 @@ try:
 
         # ---------- MOTION TOGGLE ----------
         if light_opened_once and pir.motion_detected:
+            temp_hum_disp()
             print("Motion detected → waiting 5 seconds before toggle...")
             time.sleep(5)
 

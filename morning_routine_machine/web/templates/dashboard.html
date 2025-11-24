@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Morning Routine Machine Dashboard</title>
+</head>
+<body>
+    <h1>Sensor History (latest 50)</h1>
+
+    {% if logs and logs|length > 0 %}
+        <table border="1" cellpadding="6">
+            <tr>
+                <th>Timestamp (UTC)</th>
+                <th>Temp (&deg;F)</th>
+                <th>Temp (&deg;C)</th>
+                <th>Humidity (%)</th>
+                <th>Light</th>
+                <th>Motion</th>
+            </tr>
+            {% for row in logs %}
+                <tr>
+                    <td>{{ row.timestamp }}</td>
+                    <td>{{ "%.1f"|format(row.temperature_f) if row.temperature_f is not none else "" }}</td>
+                    <td>{{ "%.1f"|format(row.temperature_c) if row.temperature_c is not none else "" }}</td>
+                    <td>{{ row.humidity if row.humidity is not none else "" }}</td>
+                    <td>{{ "Yes" if row.light else "No" }}</td>
+                    <td>{{ "Detected" if row.motion else "None" }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No sensor logs found yet.</p>
+    {% endif %}
+</body>
+</html>

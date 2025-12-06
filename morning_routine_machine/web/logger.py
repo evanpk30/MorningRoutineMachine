@@ -1,28 +1,28 @@
-from flask import Flask
+# web/logger.py
+from datetime import datetime
+
 from web.models import db, SensorLog
-import os
+from web.app import app   # import the Flask app so we can use its context
 
-app = Flask(__name__, instance_relative_config=False)
-
-# Absolute path to the correct DB location
-DB_PATH = "/home/eklaasen/morning_routine_machine/web/instance/db.sqlite3"
-
-# Ensure instance folder exists
-os.makedirs("/home/eklaasen/morning_routine_machine/web/instance", exist_ok=True)
-
-app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-db.init_app(app)
 
 def log_sensor(temp_c, temp_f, humidity, light, motion):
+    """
+    Log one sensor reading into the SensorLog table.
+    Safe to call from the automation script (separate process).
+    """
     with app.app_context():
+        # Make sure tables (including sensor_log) exist in THIS process
+        db.create_all()
+
         entry = SensorLog(
             temperature_c=temp_c,
             temperature_f=temp_f,
             humidity=humidity,
-            light=light,
-            motion=motion
+            light=bool(light),
+            motion=bool(motion),
+            timestamp=datetime.utcnow(),
         )
+
         db.session.add(entry)
         db.session.commit()
+        print(f"[DEBUG] Logged SensorLog row (id={entry.id})")

@@ -1,36 +1,78 @@
-from flask import Flask, render_template
-from models import db, SensorLog   # models.py is in the same folder
+# web/app.py
+from flask import Flask, render_template, request, redirect, url_for
+from web.models import db, SensorLog
+from pathlib import Path
 import os
+import json
 
-# Create the Flask app, using the instance/ folder for the DB
-app = Flask(__name__, instance_relative_config=True)
+# --- Base directories ---
+BASE_DIR = Path(__file__).resolve().parents[1]      # /home/.../morning_routine_machine
+INSTANCE_DIR = BASE_DIR / "instance"                # /instance folder at project root
+INSTANCE_DIR.mkdir(exist_ok=True)
 
-# Make sure instance/ exists
-os.makedirs(app.instance_path, exist_ok=True)
+DB_PATH = INSTANCE_DIR / "db.sqlite3"
 
-# SQLite DB in instance/db.sqlite3
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite3"
+print(f"[DEBUG] Flask using DB at: {DB_PATH}")
+
+app = Flask(__name__, instance_path=str(INSTANCE_DIR))
+
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
 
+with app.app_context():
+    db.create_all()
+    print("[DEBUG] db.create_all() finished in app.py")
 
+# ------------------------------
+# Config handling
+# ------------------------------
+CONFIG_PATH = INSTANCE_DIR / "config.json"
+
+DEFAULT_CONFIG = {
+    "first_activation_mode": "light",  # "light" or "time"
+    "first_activation_time": "07:30",  # HH:MM
+}
+
+def load_config():
+    if CONFIG_PATH.exists():
+        try:
+            with open(CONFIG_PATH, "r") as f:
+                data = json.load(f)
+            cfg = DEFAULT_CONFIG.copy()
+            cfg.update(data)
+            return cfg
+        except json.JSONDecodeError:
+            return DEFAULT_CONFIG.copy()
+    else:
+        return DEFAULT_CONFIG.copy()
+
+def save_config(cfg: dict):
+    INSTANCE_DIR.mkdir(exist_ok=True)
+    with open(CONFIG_PATH, "w") as f:
+        json.dump(cfg, f)
+
+# ------------------------------
+# Routes
+# ------------------------------
 @app.route("/")
 def dashboard():
-    # Query latest 50 rows
     logs = SensorLog.query.order_by(SensorLog.timestamp.desc()).limit(50).all()
+    config = load_config()
     print(f"[DEBUG] Loaded {len(logs)} rows from SensorLog")
-    return render_template("dashboard.html", logs=logs)
+    return render_template("dashboard.html", logs=logs, config=config)
 
+@app.route("/update-settings", methods=["POST"])
+def update_settings():
+    cfg = load_config()
 
-if __name__ == "__main__":
-    with app.app_context():
-        db_path = os.path.join(app.instance_path, "db.sqlite3")
-        if not os.path.exists(db_path):
-            print("Creating new database inside instance folder...")
-            db.create_all()
-        else:
-            print("Database already exists, skipping create_all().")
+    mode = request.form.get("activation_mode", "light")
+    time_str = request.form.get("activation_time", "07:30")
 
-    print("Starting Flask app on 0.0.0.0:5000 ...")
-    app.run(host="0.0.0.0", port=5000)
+    cfg["first_activation_mode"] = mode
+    cfg["first_activation_time"] = time_str or "07:30"
+
+    save_config(cfg)
+    print(f"[DEBUG] Updated config: {cfg}")
+    return redirect(url_for("dashboard"))

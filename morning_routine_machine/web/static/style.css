@@ -1,0 +1,360 @@
+/* Basic reset & layout */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #0f172a; /* dark blue slate */
+    color: #e5e7eb;
+    min-height: 100vh;
+}
+
+.page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+/* Top bar */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.75rem;
+}
+
+.app-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.app-subtitle {
+    font-size: 0.9rem;
+    color: #9ca3af;
+    margin-top: 0.25rem;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Pills (status tags) */
+.pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 0.25rem 0.7rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.pill-small {
+    padding: 0.15rem 0.55rem;
+    font-size: 0.7rem;
+}
+
+.pill-green {
+    background-color: #22c55e33;
+    color: #4ade80;
+    border: 1px solid #22c55e66;
+}
+
+.pill-yellow {
+    background-color: #facc1533;
+    color: #fde68a;
+    border: 1px solid #facc1566;
+}
+
+.pill-purple {
+    background-color: #a855f733;
+    color: #e9d5ff;
+    border: 1px solid #a855f766;
+}
+
+.pill-dark {
+    background-color: #111827;
+    color: #9ca3af;
+    border: 1px solid #374151;
+}
+
+.pill-grey {
+    background-color: #4b556333;
+    color: #e5e7eb;
+    border: 1px solid #6b7280;
+}
+
+/* Main layout */
+.main {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+/* Summary cards */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.card {
+    background: linear-gradient(135deg, #111827, #020617);
+    border-radius: 0.9rem;
+    padding: 1rem;
+    border: 1px solid #1f2937;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.35);
+}
+
+.card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #9ca3af;
+    margin-bottom: 0.25rem;
+}
+
+.card-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-top: 0.25rem;
+}
+
+.card-footer {
+    margin-top: 0.3rem;
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+.muted {
+    color: #9ca3af;
+    font-size: 0.85rem;
+}
+
+/* Rules section */
+.rules {
+    background: #020617;
+    border-radius: 0.9rem;
+    padding: 1rem;
+    border: 1px solid #1f2937;
+}
+
+.section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.section-subtitle {
+    font-size: 0.85rem;
+    color: #9ca3af;
+}
+
+.rules-list {
+    list-style: none;
+    margin-top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.rule-label {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #9ca3af;
+    margin-right: 0.5rem;
+}
+
+.rule-text {
+    font-size: 0.9rem;
+}
+
+/* Logs / table */
+.logs {
+    background: #020617;
+    border-radius: 0.9rem;
+    padding: 1rem;
+    border: 1px solid #1f2937;
+}
+
+.logs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.75rem;
+}
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 0.75rem;
+    border: 1px solid #1f2937;
+}
+
+.log-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.log-table thead {
+    background: #020617;
+}
+
+.log-table th,
+.log-table td {
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #111827;
+    white-space: nowrap;
+}
+
+.log-table th {
+    font-weight: 600;
+    color: #9ca3af;
+    position: sticky;
+    top: 0;
+    backdrop-filter: blur(10px);
+    background: rgba(15, 23, 42, 0.95);
+}
+
+.log-table tbody tr:nth-child(even) {
+    background: rgba(15, 23, 42, 0.75);
+}
+
+.log-table tbody tr:hover {
+    background: rgba(30, 64, 175, 0.45);
+}
+
+/* Empty state */
+.empty-state {
+    font-size: 0.9rem;
+    color: #9ca3af;
+}
+
+/* Footer */
+.footer {
+    margin-top: 1.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #1f2937;
+    font-size: 0.8rem;
+    color: #6b7280;
+    text-align: center;
+}
+
+/* Responsive tweaks */
+@media (max-width: 900px) {
+    .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .page {
+        padding: 1rem;
+    }
+    .cards {
+        grid-template-columns: 1fr;
+    }
+    .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.4rem;
+    }
+}
+.settings-form {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.settings-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.settings-option input[type="radio"] {
+    margin-right: 0.4rem;
+}
+
+.settings-time input[type="time"] {
+    margin-left: 0.25rem;
+    background: #020617;
+    border: 1px solid #374151;
+    border-radius: 0.4rem;
+    padding: 0.2rem 0.4rem;
+    color: #e5e7eb;
+}
+
+.btn {
+    align-self: flex-start;
+    margin-top: 0.5rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid #4f46e5;
+    background: #4f46e5;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #4338ca;
+}
+
+.settings-form {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.settings-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.settings-option input[type="radio"] {
+    margin-right: 0.4rem;
+}
+
+.settings-time input[type="time"] {
+    margin-left: 0.25rem;
+    background: #020617;
+    border: 1px solid #374151;
+    border-radius: 0.4rem;
+    padding: 0.2rem 0.4rem;
+    color: #e5e7eb;
+}
+
+.btn {
+    align-self: flex-start;
+    margin-top: 0.5rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid #4f46e5;
+    background: #4f46e5;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #4338ca;
+}

@@ -1,5 +1,9 @@
+#!/usr/bin/env python3
 import sys
 import os
+import json
+from pathlib import Path
+from datetime import datetime, time as dtime
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(PROJECT_ROOT)
@@ -7,8 +11,33 @@ sys.path.append(PROJECT_ROOT)
 from gpiozero import OutputDevice, InputDevice, MotionSensor
 import time
 
-from DisplayTempHumLed import temp_hum_disp
+from automation.DisplayTempHumLed import temp_hum_disp
 from web.logger import log_sensor   # <-- DB logging helper
+
+
+# ------------------------------
+# Config Helpers
+# ------------------------------
+def load_config():
+    """
+    Load first-activation settings from instance/config.json
+    at the project root.
+    """
+    project_root = Path(__file__).resolve().parents[1]
+    config_path = project_root / "instance" / "config.json"
+    default = {
+        "first_activation_mode": "light",  # "light" or "time"
+        "first_activation_time": "07:30",  # HH:MM 24hr
+    }
+
+    try:
+        with open(config_path, "r") as f:
+            data = json.load(f)
+        cfg = default.copy()
+        cfg.update(data)
+        return cfg
+    except (FileNotFoundError, json.JSONDecodeError):
+        return default
 
 
 # ------------------------------
@@ -77,37 +106,64 @@ is_open = False               # Current blind state
 # Main Behavior Loop
 # ------------------------------
 print("System Ready.")
-print("Rule 1: First light → OPEN blinds (3 turns)")
-print("Rule 2: After that → Motion toggles OPEN/CLOSE\n")
+print("Rule 1: First activation -> OPEN blinds (3 turns)")
+print("Rule 2: After that -> Motion toggles OPEN/CLOSE\n")
 
 try:
     while True:
+        # Reload config each loop so website changes take effect
+        cfg = load_config()
+        first_mode = cfg.get("first_activation_mode", "light")
+        first_time_str = cfg.get("first_activation_time", "07:30")
+
+        first_time_obj = None
+        if first_mode == "time":
+            try:
+                h, m = map(int, first_time_str.split(":"))
+                first_time_obj = dtime(hour=h, minute=m)
+            except ValueError:
+                first_mode = "light"
 
         # ======================================================
-        # ONE-TIME LIGHT TRIGGER
+        # ONE-TIME FIRST ACTIVATION (LIGHT or TIME)
         # ======================================================
-        if not light_opened_once and light_detected():
+        now_time = datetime.now().time()
 
-            # Read and display sensor values
-            temp_c, temp_f, humidity = temp_hum_disp()
+        if not light_opened_once:
+            should_trigger = False
+            trigger_reason = ""
 
-            # Log values to DB
-            log_sensor(
-                temp_c=temp_c,
-                temp_f=temp_f,
-                humidity=humidity,
-                light=True,
-                motion=False
-            )
+            if first_mode == "light":
+                if light_detected():
+                    should_trigger = True
+                    trigger_reason = "Light detected"
+            elif first_mode == "time" and first_time_obj is not None:
+                # Trigger once when current time is past scheduled time
+                if now_time >= first_time_obj:
+                    should_trigger = True
+                    trigger_reason = f"Scheduled time {first_time_str}"
 
-            print("Light detected → Opening blinds (3 turns CW)...")
-            move_steps(0, 3, THREE_TURNS)
-            motor_stop()
-            print("Blinds opened from first-light trigger.\n")
+            if should_trigger:
+                # Read and display sensor values
+                temp_c, temp_f, humidity = temp_hum_disp()
 
-            light_opened_once = True
-            is_open = True
-            time.sleep(1)
+                # Log values to DB
+                log_sensor(
+                    temp_c=temp_c,
+                    temp_f=temp_f,
+                    humidity=humidity,
+                    light=light_detected(),
+                    motion=False
+                )
+
+                print(f"{trigger_reason} -> Opening blinds (3 turns CW)...")
+                move_steps(0, 3, THREE_TURNS)
+                motor_stop()
+                print("Blinds opened from first activation.\n")
+
+                light_opened_once = True
+                is_open = True
+                time.sleep(1)
 
         # ======================================================
         # MOTION-BASED TOGGLE
@@ -125,7 +181,8 @@ try:
                 light=light_detected(),
                 motion=True
             )
-            print("Motion detected → Waiting 5 seconds before toggle...")
+
+            print("Motion detected -> Waiting 5 seconds before toggle...")
             time.sleep(5)
 
             # Toggle blinds
@@ -144,7 +201,6 @@ try:
 
         # Reduce CPU load
         time.sleep(0.1)
-
 
 except KeyboardInterrupt:
     motor_stop()

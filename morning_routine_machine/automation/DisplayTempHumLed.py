@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import time
-from LCDDisplay import CharLCD1602
-from dht_reader import read_dht   # 👈 IMPORT YOUR DHT FUNCTION
+from automation.LCDDisplay import CharLCD1602
+from automation.dht_reader import read_dht   # 👈 IMPORT YOUR DHT FUNCTION
 
 lcd1602 = CharLCD1602()
 

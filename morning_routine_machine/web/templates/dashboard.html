@@ -76,7 +76,12 @@
                             <p class="card-value muted">No motion in last event</p>
                         {% endif %}
                         <p class="card-footer">
-                            {{ latest.timestamp.strftime("%Y-%m-%d %H:%M:%S") }}
+							{% if latest.az_time %}
+								{{ latest.az_time.strftime("%Y-%m-%d %H:%M:%S") }}
+							{% else %}
+								-
+							{% endif %}
+                            
                         </p>
                     {% else %}
                         <p class="card-value muted">No events yet</p>
@@ -155,7 +160,7 @@
                         <table class="log-table">
                             <thead>
                                 <tr>
-                                    <th>Time (UTC)</th>
+                                    <th>Time (Local)</th>
                                     <th>Temp (&deg;F)</th>
                                     <th>Temp (&deg;C)</th>
                                     <th>Humidity (%)</th>
@@ -166,7 +171,7 @@
                             <tbody>
                                 {% for row in logs %}
                                     <tr>
-                                        <td>{{ row.timestamp.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+                                        <td>{{ row.az_time.strftime("%Y-%m-%d %H:%M:%S") }}</td>
                                         <td>{{ "%.1f"|format(row.temperature_f) if row.temperature_f is not none else "-" }}</td>
                                         <td>{{ "%.1f"|format(row.temperature_c) if row.temperature_c is not none else "-" }}</td>
                                         <td>{{ "%.0f"|format(row.humidity) if row.humidity is not none else "-" }}</td>

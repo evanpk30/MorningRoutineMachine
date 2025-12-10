@@ -20,9 +20,8 @@ def log_sensor(temp_c, temp_f, humidity, light, motion):
             humidity=humidity,
             light=bool(light),
             motion=bool(motion),
-            timestamp=datetime.utcnow(),
         )
 
         db.session.add(entry)
         db.session.commit()
-        print(f"[DEBUG] Logged SensorLog row (id={entry.id})")
+        print(f"[DEBUG] Logged SensorLog row (id={entry.id}, ts={entry.timestamp})")
